@@ -1,0 +1,51 @@
+{
+  "catalog_id": "product/twitter-monitor/gateway",
+  "product_slug": "twitter-monitor",
+  "schema_version": 2,
+  "revision": 1,
+  "min_cli_version": "0.1.0",
+  "mode": "native",
+  "scopes": [
+    {"code": "tweets.read", "description": "Read matching tweets"}
+  ],
+  "operations": [
+    {
+      "operation_id": "tweets.get",
+      "surface_id": "data-rest",
+      "protocol": "rest",
+      "method": "GET",
+      "path_template": "/api/v1/tweets/{tweet_id}",
+      "description": "Read one tweet",
+      "params": [
+        {"name": "tweet_id", "in": "path", "required": true, "schema": {"type": "string", "minLength": 1}},
+        {"name": "expand", "in": "query", "required": false, "schema": {"type": "string", "enum": ["author"]}}
+      ],
+      "side_effect": "none",
+      "idempotent": true,
+      "required_scope": "tweets.read"
+    },
+    {
+      "operation_id": "tweets.search",
+      "surface_id": "mcp",
+      "protocol": "mcp",
+      "method": "POST",
+      "path_template": "/api/v1/mcp",
+      "protocol_operation": "tools/call:get_tweets",
+      "params": [],
+      "side_effect": "none",
+      "idempotent": true,
+      "required_scope": "tweets.read",
+      "mcp": {
+        "tool_name": "get_tweets",
+        "title": "Get tweets",
+        "description": "Search tweets visible to the current user.",
+        "input_schema": {
+          "type": "object",
+          "properties": {"query": {"type": "string", "minLength": 1}},
+          "required": ["query"],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

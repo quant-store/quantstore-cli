@@ -1,68 +1,106 @@
 # QuantStore CLI (`qs`)
 
-QuantStore 命令行客户端，支持 macOS、Linux 和 Windows。
-The QuantStore command-line client for macOS, Linux, and Windows.
+Standalone Go command-line client for QuantStore's programmatic account API.
+It is an independent module and does not import web-core or subproduct
+`internal` packages.
 
-[下载最新版本 / Latest release](https://github.com/quant-store/quantstore-cli/releases/latest) · [QuantStore](https://quant-store.com)
+## Download and install / 下载与安装
 
-## 下载 / Downloads
+Full CLI source, tests, build files, and the required catalog/hash libraries are included under the [MIT License](LICENSE).
+本仓库包含完整 CLI 源码、测试、构建文件及必要的目录与哈希库，采用 MIT 许可证。
 
-| 平台 / Platform | 下载 / Download |
+[Latest release / 最新版本](https://github.com/quant-store/quantstore-cli/releases/latest)
+
+| Platform / 平台 | Executable / 程序 |
 | --- | --- |
-| macOS Apple Silicon (M1/M2/M3/M4, arm64) | [qs-darwin-arm64](https://github.com/quant-store/quantstore-cli/releases/download/v0.1.0/qs-darwin-arm64) |
-| macOS Intel (amd64) | [qs-darwin-amd64](https://github.com/quant-store/quantstore-cli/releases/download/v0.1.0/qs-darwin-amd64) |
-| Linux x86_64 (amd64) | [qs-linux-amd64](https://github.com/quant-store/quantstore-cli/releases/download/v0.1.0/qs-linux-amd64) |
-| Linux arm64 | [qs-linux-arm64](https://github.com/quant-store/quantstore-cli/releases/download/v0.1.0/qs-linux-arm64) |
-| Windows x86_64 (amd64) | [qs-windows-amd64.exe](https://github.com/quant-store/quantstore-cli/releases/download/v0.1.0/qs-windows-amd64.exe) |
+| macOS Apple Silicon | [qs-darwin-arm64](https://github.com/quant-store/quantstore-cli/releases/download/v0.1.1/qs-darwin-arm64) |
+| macOS Intel | [qs-darwin-amd64](https://github.com/quant-store/quantstore-cli/releases/download/v0.1.1/qs-darwin-amd64) |
+| Linux x86_64 | [qs-linux-amd64](https://github.com/quant-store/quantstore-cli/releases/download/v0.1.1/qs-linux-amd64) |
+| Linux arm64 | [qs-linux-arm64](https://github.com/quant-store/quantstore-cli/releases/download/v0.1.1/qs-linux-arm64) |
+| Windows x86_64 | [qs-windows-amd64.exe](https://github.com/quant-store/quantstore-cli/releases/download/v0.1.1/qs-windows-amd64.exe) |
 
-选择与你的操作系统和处理器匹配的文件。Release 中的 `Source code` 压缩包不是可执行程序。
-Choose the file matching your operating system and processor. The automatically generated `Source code` archives are not executable downloads.
-
-## 安装 / Installation
-
-### macOS / Linux
-
-以下以 Apple Silicon Mac 为例；其他平台替换下载文件名。
-Example for an Apple Silicon Mac; replace the asset name for another platform.
+macOS / Linux: download the matching file, rename it to `qs`, then run:
+下载对应文件并重命名为 `qs`，执行：
 
 ```sh
-curl -fL https://github.com/quant-store/quantstore-cli/releases/download/v0.1.0/qs-darwin-arm64 -o qs
 chmod +x qs
 ./qs version
 sudo install -m 755 qs /usr/local/bin/qs
 ```
 
-### Windows PowerShell
+Windows: rename the downloaded file to `qs.exe` and run `.\qs.exe version` in PowerShell.
+Windows 下载后重命名为 `qs.exe`，在 PowerShell 运行 `.\qs.exe version`。
 
-```powershell
-Invoke-WebRequest https://github.com/quant-store/quantstore-cli/releases/download/v0.1.0/qs-windows-amd64.exe -OutFile qs.exe
-.\qs.exe version
-.\qs.exe --help
-```
+## Build from source / 源码构建
 
-将 `qs.exe` 所在目录加入 PATH 后可直接使用 `qs`。
-Add the directory containing `qs.exe` to PATH to run `qs` from any terminal.
-
-## 开始使用 / Getting started
-
-在 QuantStore 创建有相应权限的 API Key，然后在终端执行以下命令并按提示输入。
-Create a QuantStore API key with the required permissions, then run this command and enter the key at the prompt.
+Download this repository's source archive, extract it, and run these commands in the extracted directory. Go 1.23 or newer is required.
+下载本仓库源码压缩包并解压，在源码目录执行以下命令，需要 Go 1.23 或更新版本。
 
 ```sh
-qs auth set --stdin
-qs auth status
-qs account show
-qs wallet balance
-qs --help
+go test ./...
+go vet ./...
+go build -buildvcs=false -trimpath -o qs ./cmd/qs
+./qs version
 ```
 
-API Key 存入系统凭据管理器，不写入配置文件。默认连接 `https://api.quant-store.com`。
-The API key is stored in the OS credential manager, not the configuration file. The default API origin is `https://api.quant-store.com`.
+Release version metadata can be set with `make build VERSION=0.1.1` on macOS/Linux, or `.\build.ps1 -Version 0.1.1` on Windows.
+macOS/Linux 使用 `make build VERSION=0.1.1`，Windows 使用 `.\build.ps1 -Version 0.1.1` 可写入版本信息。
 
-无桌面凭据服务的 Linux 或 CI 环境可通过进程环境变量 `QS_API_KEY` 提供 Key；从现有密钥管理工具注入，避免放进命令参数或脚本正文。
-Headless Linux and CI can supply a process-local `QS_API_KEY` through their existing secret manager. Keep keys out of command arguments and script bodies.
+## Build and test
 
-## 命令 / Commands
+Requirements: Go 1.23 or newer.
+
+Platform-neutral development commands:
+
+```bash
+go test ./...
+go build -buildvcs=false -trimpath -o qs ./cmd/qs
+```
+
+Release-shaped local builds use the platform helper:
+
+```bash
+# macOS / Linux
+cd quantstore-cli
+make test
+make build VERSION=0.1.1 BUILD_DATE=2026-07-12T00:00:00Z
+./bin/qs version
+```
+
+```powershell
+# Windows PowerShell
+Set-Location quantstore-cli
+go test ./...
+.\build.ps1 -Version 0.1.1 -BuildDate 2026-07-12T00:00:00Z
+.\bin\qs.exe version
+```
+
+## Configure
+
+The default profile targets `https://api.quant-store.com`. Local profile files
+contain only endpoint/output preferences and an OS-keychain reference; API key
+plaintext is never written to the config file.
+
+```bash
+# Pipe from a source that does not put the key in shell arguments.
+printf '%s\n' "$QS_API_KEY" | env -u QS_API_KEY qs auth set --stdin
+
+qs auth status
+qs profile set local --base-url http://localhost:8080
+qs profile use local
+```
+
+For CI, set `QS_API_KEY` for that process. It takes precedence over the OS
+keychain and is never persisted by the CLI.
+
+The native credential backends are macOS Keychain, Linux Secret Service over a
+session D-Bus, and Windows Credential Manager. Headless Linux sessions commonly
+lack Secret Service; in that case keychain operations fail closed and CI should
+provide only the process-local `QS_API_KEY`. There is no plaintext file
+fallback. Keychain calls have a 15-second command bound; an interrupted
+write/delete reports that its final backend result may be unknown.
+
+## Current commands
 
 ```text
 qs auth set --stdin | status | delete
@@ -72,18 +110,71 @@ qs wallet balance | ledger
 qs subscriptions list | show
 qs orders list | show
 qs usage summary | calls
-qs product request <product-slug> <operation-id>
 qs completion bash|zsh|fish|powershell
 qs version
 ```
 
-`--output json` 可输出 JSON，适合脚本处理。产品请求取决于已发布的产品目录、API Key 权限与订阅权益；当前支持目录允许的 REST GET/HEAD 操作。
-Use `--output json` for scripts. Product requests depend on the published catalog, API-key permissions, and subscription entitlements; supported operations are catalog-approved REST GET/HEAD calls.
+Use `--output table|json|jsonl|yaml|raw`; `auto` selects table on a terminal and
+JSON when piped. Usage responses are explicitly reported as best-effort and
+partial platform responses produce a warning on stderr without corrupting
+stdout.
 
-## 当前发布范围 / Distribution scope
+## Product catalog and release status
 
-本仓库当前提供可执行程序与安装说明，尚未包含 CLI 源码。平台 API 和各产品服务独立运行。
-This repository currently distributes executable builds and installation instructions. CLI source code is not included in this repository. The platform API and product services run separately.
+`qs product request <slug> <operation-id>` is implemented for bodyless REST
+`GET`/`HEAD` operations. Use repeatable `--path name=value` and
+`--query name=value` flags; callers never supply a raw URL, method, header, or
+catalog digest.
 
-问题反馈请使用 [Issues](https://github.com/quant-store/quantstore-cli/issues)，不要提交 API Key 或其他凭据。
-Report problems through [Issues](https://github.com/quant-store/quantstore-cli/issues) without including API keys or other credentials.
+The CLI reads two small objects directly from the dedicated Cloudflare R2
+custom domain; web-core does not proxy them:
+
+```text
+/catalogs/v1/products/<slug>.json
+/catalogs/v1/sha256/<64-lowercase-hex>.json
+```
+
+The first is a strict five-field current reference:
+
+```json
+{
+  "schema_version": 1,
+  "product_slug": "coinglass",
+  "catalog_id": "product/coinglass/proxy",
+  "catalog_digest": "sha256:<64-lowercase-hex>",
+  "https_origin": "https://coinglass.proxy.quant-store.com"
+}
+```
+
+The second is the canonical catalog bytes whose SHA-256 equals the reference.
+The CLI strict-parses it, rechecks product/catalog identity and digest, and
+atomically caches it with mode `0600`. R2 downloads carry no IAM credential.
+Only after all catalog checks pass does the CLI send the profile's Bearer key
+to the exact `*.proxy.quant-store.com` or `*.gateway.quant-store.com` origin.
+
+Existing operations whose missing classification safely normalizes to
+`driver_required` continue through the compiled Coinglass, Twitter Monitor, or
+Smart Money Monitor Pro driver. A newly added endpoint can avoid a full CLI download only
+when its catalog entry explicitly declares `cli_execution: "declarative"` and
+`required_cli_capabilities: ["rest.read.v1"]`, and is REST GET/HEAD, bodyless,
+side-effect-free, idempotent, and fully described by scalar path/query schemas.
+Everything else—including POST/mutations, MCP, WSS, files, custom headers,
+special normalization, or a new capability—still requires executable code.
+
+There is no background updater or GitHub Actions implementation in this
+repository. Publishing the R2 objects is an external/manual release operation.
+Account, wallet, subscriptions, orders, and usage commands do not initialize or
+depend on the product catalog resolver.
+
+## Security behavior
+
+- The API key is accepted only through stdin/no-echo terminal input, the OS
+  keychain, or the process-local `QS_API_KEY` environment variable.
+- Requests use only `Authorization: Bearer ...`; the key is never placed in a
+  URL, query parameter, config file, or command argument.
+- HTTP redirects are never followed, including same-origin redirects.
+- Non-local endpoints require HTTPS. Plain HTTP is accepted only for loopback
+  development origins.
+- stdout is reserved for business output; warnings and request IDs are emitted
+  on stderr.
+
